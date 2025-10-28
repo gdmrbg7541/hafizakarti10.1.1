@@ -322,11 +322,12 @@
             const gameScreen = document.getElementById('game-screen');
             if (!gameScreen) return;
             
+            // DEĞİŞİKLİK: Oyun sonu ekranı HTML'inden metin (h2) ve ikon (div) kaldırıldı.
             gameScreen.innerHTML = `
                 <div class="score-display" id="player1-display"> <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"></path></svg> <span id="score1">0</span> </div>
                 <div id="game-board"></div>
                 <div class="score-display" id="player2-display"> <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"></path></svg> <span id="score2">0</span> </div>
-                <div class="game-over-overlay hidden" id="memory-game-over"> <div id="winner-icon-container"></div> <h2 id="memory-win-text"></h2> <div class="win-buttons"> <button class="icon-btn" id="play-again-memory-btn" title="Tekrar Oyna"><svg viewBox="0 0 24 24"><path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"></path></svg></button> </div> </div>`;
+                <div class="game-over-overlay hidden" id="memory-game-over"> <div class="win-buttons"> <button class="icon-btn" id="play-again-memory-btn" title="Tekrar Oyna"><svg viewBox="0 0 24 24"><path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"></path></svg></button> </div> </div>`;
 
             this.dom.board = document.getElementById('game-board'); 
             this.dom.p1Display = document.getElementById('player1-display'); 
@@ -334,8 +335,10 @@
             this.dom.score1 = document.getElementById('score1'); 
             this.dom.score2 = document.getElementById('score2'); 
             this.dom.gameOverContainer = document.getElementById('memory-game-over'); 
-            this.dom.winText = document.getElementById('memory-win-text'); 
-            this.dom.winnerIcon = document.getElementById('winner-icon-container');
+            
+            // DEĞİŞİKLİK: Kaldırılan elementlerin referansları silindi.
+            // this.dom.winText = document.getElementById('memory-win-text'); 
+            // this.dom.winnerIcon = document.getElementById('winner-icon-container');
 
             document.getElementById('play-again-memory-btn').onclick = () => { 
                 App.playSound('menuClick'); 
@@ -450,24 +453,13 @@
                  if (this.dom.p2Display) this.dom.p2Display.classList.toggle('active', this.state.c !== 1);
              }
          },
+         
+        // DEĞİŞİKLİK: Fonksiyon, sadece overlay'i göstermek için basitleştirildi.
         showEndUI() {
-             if (!this.dom.gameOverContainer || !this.dom.winText || !this.dom.winnerIcon) return;
-             let text = ''; let winner = 0; let winnerClass = ''; const iconSVG = `<svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" /></svg>`;
-
-             if (this.state.playerMode === 1) {
-                 text = `Tebrikler! Skor: ${this.state.s1}`;
-                 winnerClass = 'p1-win'; 
-                 this.dom.winnerIcon.innerHTML = iconSVG;
-             } else {
-                 if (this.state.s1 > this.state.s2) { text = '1. Oyuncu Kazandı!'; winner = 1; winnerClass = 'p1-win'; this.dom.winnerIcon.innerHTML = iconSVG; }
-                 else if (this.state.s2 > this.state.s1) { text = '2. Oyuncu Kazandı!'; winner = 2; winnerClass = 'p2-win'; this.dom.winnerIcon.innerHTML = iconSVG; }
-                 else { text = 'Berabere!'; winnerClass = 'draw'; this.dom.winnerIcon.innerHTML = iconSVG + iconSVG; }
-             }
-
-             this.dom.winText.innerText = text;
-             this.dom.winText.className = ''; this.dom.winnerIcon.className = '';
-             this.dom.winText.classList.add(winnerClass);
-             this.dom.winnerIcon.classList.add('winner-icon', winnerClass);
+             if (!this.dom.gameOverContainer) return;
+             
+             // Metin ve ikon gösterme mantığı kaldırıldı.
+             
              this.dom.gameOverContainer.classList.remove('hidden');
          }
     };
