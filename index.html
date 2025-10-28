@@ -236,8 +236,15 @@
             gameScreen: document.getElementById('game-screen'),
         },
         
+        // --- DEĞİŞTİRİLDİ ---
         init() {
             MemoryGame.init();
+
+            // Yükleme sırasında kullanıcıya geri bildirim ver
+            if (this.dom.gameScreen) {
+                // "Yükleniyor..." metni eklendi
+                this.dom.gameScreen.innerHTML = '<h2 style="font-family: \'Noto Naskh Arabic\', serif; color: var(--text-color);">Yükleniyor...</h2>';
+            }
 
             const initAudioOnFirstInteraction = () => {
                 if (this.state.isAudioInitialized) return; 
@@ -248,7 +255,17 @@
             document.addEventListener('click', initAudioOnFirstInteraction);
             document.addEventListener('touchstart', initAudioOnFirstInteraction);
             
-            MemoryGame.start(gameData, 1); 
+            // YENİ KOD:
+            // Önce görselleri yükle, yükleme bittiğinde oyunu başlat
+            this.preloadGameImages(gameData).then(() => {
+                console.log("Tüm görseller yüklendi, oyun başlıyor.");
+                // Yükleniyor... mesajını temizleyip oyunu başlat
+                MemoryGame.start(gameData, 1); 
+            }).catch(err => {
+                console.error("Görsel yükleme sırasında bir hata oluştu:", err);
+                // Bir hata olsa bile oyunu başlatmayı dene
+                MemoryGame.start(gameData, 1);
+            });
         },
         
         initAudio() { 
@@ -308,6 +325,24 @@
             o.start(0); 
             o.stop(this.state.audioCtx.currentTime + sound.d); 
         },
+
+        // --- YENİ EKLENDİ ---
+        preloadGameImages(data) {
+            const promises = data.map(item => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = item.img;
+                    // Yüklendiğinde veya hata verdiğinde promise'i çöz
+                    img.onload = () => resolve(img);
+                    img.onerror = () => {
+                        console.error(`Görsel yüklenemedi: ${item.img}`);
+                        resolve(null); // Hata olsa bile oyunun başlamasına izin ver
+                    };
+                });
+            });
+            // Tüm görsellerin yüklenmesini bekle
+            return Promise.all(promises);
+        },
     };
 
     // --- MEMORY GAME MODULE (Görsel ve Data için Güncellendi) ---
@@ -323,6 +358,7 @@
             if (!gameScreen) return;
             
             // DEĞİŞİKLİK: Oyun sonu ekranı HTML'inden metin (h2) ve ikon (div) kaldırıldı.
+            // "Yükleniyor..." metni de buradan temizlenmiş oluyor.
             gameScreen.innerHTML = `
                 <div class="score-display" id="player1-display"> <svg viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"></path></svg> <span id="score1">0</span> </div>
                 <div id="game-board"></div>
@@ -342,6 +378,7 @@
 
             document.getElementById('play-again-memory-btn').onclick = () => { 
                 App.playSound('menuClick'); 
+                // Tekrar oynarken de görseller zaten yüklü olduğu için hızlıca başlar
                 this.start(gameData, this.state.playerMode); 
             };
 
